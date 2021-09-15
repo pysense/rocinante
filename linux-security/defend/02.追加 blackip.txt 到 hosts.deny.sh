@@ -4,7 +4,7 @@ if [[ ! -f /etc/hosts.deny.vbak ]]; then
 fi
 for i in $(cat blackip.txt); do
     if ! grep -q "^sshd:$i$" /etc/hosts.deny; then
-        echo "Add:$i"
+        echo "Add IP to hosts.deny: $i"
         echo "sshd:$i" >> /etc/hosts.deny
     fi
 done
