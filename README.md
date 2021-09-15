@@ -1,6 +1,6 @@
 ## Git 整个系统
 
-```
+```bash
 cd /
 cat > .gitignore << EOF
 /etc/ld.so.cache
