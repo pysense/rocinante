@@ -1,10 +1,10 @@
 #/bin/bash
 
 # Debian 系默认未安装 Auditd
-if ! command -v aureport > /dev/null; then exit; fi
+if ! command -v aureport > /dev/null; then echo "auditd not found."; fi
 
 for a in $(
-    aureport -l --failed | awk '{print$5}' | sort | uniq -c | sort -rn |
+    aureport -l --failed | awk '/ssh/{print$5}' | sort | uniq -c | sort -rn |
         awk '$1>=5{print$2}' # 打印失败次数大等于 5 的 IP
 ); do
     if ! grep -q "^$a$" blackip.txt; then
