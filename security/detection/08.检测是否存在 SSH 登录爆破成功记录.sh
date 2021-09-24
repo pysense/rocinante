@@ -18,7 +18,7 @@ fi
 
 # from: journalctl
 if command -v journalctl > /dev/null; then
-    journal | awk '/sshd.*Failed/{print$(NF-3)}' | grep -Eo "([0-9]+\.){3}[0-9]+" | sort | uniq >> $swap
+    journalctl | awk '/sshd.*Failed/{print$(NF-3)}' | grep -Eo "([0-9]+\.){3}[0-9]+" | sort | uniq >> $swap
 fi
 
 # from: /var/log/
@@ -40,7 +40,7 @@ fi
 
 # from: journalctl
 if command -v journalctl > /dev/null; then
-    journal | awk '/sshd.*Accepted/{print$(NF-5)}' | grep -Eo "([0-9]+\.){3}[0-9]+" | sort | uniq >> $swap
+    journalctl | awk '/sshd.*Accepted/{print$(NF-5)}' | grep -Eo "([0-9]+\.){3}[0-9]+" | sort | uniq >> $swap
 fi
 
 # from: /var/log/
