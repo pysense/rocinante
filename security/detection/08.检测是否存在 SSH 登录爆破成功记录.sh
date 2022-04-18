@@ -6,51 +6,54 @@ success_ip=$(mktemp)
 swap=$(mktemp)
 
 # 统计失败 IP
-# from: lastb
+> $swap
+echo "> 从 lastb 获取登录失败 IP"
 for i in $(find /var/log -type f -name btmp*); do
     lastb -f $i
 done | awk '/ssh:/{if(/^[ ]/){print$2}else{print$3}}' | sort | uniq >> $swap
 
-# from: aureport
+echo "> 从 aureport 获取登录失败 IP"
 if command -v aureport > /dev/null; then
     aureport -l --failed | awk '/ssh/{print$5}' | sort | uniq >> $swap
 fi
 
-# from: journalctl
+echo "> 从 journalctl 获取登录失败 IP"
 if command -v journalctl > /dev/null; then
     journalctl | awk '/sshd.*Failed/{print$(NF-3)}' | grep -Eo "([0-9]+\.){3}[0-9]+" | sort | uniq >> $swap
 fi
 
-# from: /var/log/
+echo "> 从 /var/log 获取登录失败 IP"
 cat $(ls /var/log/secure /var/log/auth.log 2> /dev/null) | awk '/sshd.*Failed/{print$(NF-3)}' | grep -Eo "([0-9]+\.){3}[0-9]+" | sort | uniq >> $swap
 
+# 失败 IP 去重
 sort $swap | uniq > $failed_ip
 
-> $swap
 # 统计成功 IP
-# from: last
+> $swap
+echo "> 从 last 获取登录成功 IP"
 for i in $(find /var/log -type f -name wtmp*); do
     last -f $i
 done | awk '/pts/{if(/^[ ]/){print$2}else{print$3}}' | sort | uniq >> $swap
 
-# from: aureport
+echo "> 从 aureport 获取登录成功 IP"
 if command -v aureport > /dev/null; then
     aureport -l --success | awk '/ssh/{print$5}' | sort | uniq >> $swap
 fi
 
-# from: journalctl
+echo "> 从 journalctl 获取登录成功 IP"
 if command -v journalctl > /dev/null; then
     journalctl | awk '/sshd.*Accepted/{print$(NF-5)}' | grep -Eo "([0-9]+\.){3}[0-9]+" | sort | uniq >> $swap
 fi
 
-# from: /var/log/
+echo "> 从 /var/log 获取登录成功 IP"
 cat $(ls /var/log/secure /var/log/auth.log 2> /dev/null) | awk '/sshd.*Accepted/{print$(NF-5)}' | grep -Eo "([0-9]+\.){3}[0-9]+" | sort | uniq >> $swap
 
+# 成功 IP 去重
 sort $swap | uniq > $success_ip
 
 # 检查即失败又成功的 IP
 for i in $(cat $success_ip); do
-    echo "Checking suspicious IP: $i"
+    echo "检查登录成功 IP 是否存在失败记录: $i"
     if grep -q "^$i$" $failed_ip; then
         echo ">>> 01. Logs from last[b] for IP: $i"
         for j in $(find /var/log -type f -name [bw]tmp*); do
