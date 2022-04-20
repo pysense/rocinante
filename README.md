@@ -3,10 +3,14 @@
 ```bash
 cd /
 cat > .gitignore << EOF
-/etc/ld.so.cache
-.zsh_history
 /proc
-/var/lib/docker
+/dev
+/sys
+/run
+/var
+/data/mariadb
+.bash_history
+.viminfo
 EOF
 
 git init
